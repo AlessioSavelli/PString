@@ -79,9 +79,9 @@ Token 2: Arduino
 Token 3: OPTA
 
 Split con puntatori:
-Token 0: Ciao
-Token 1: Mondo
-Token 2: Arduino
+Token 0: Ciao:Mondo:Arduino:OPTA
+Token 1: Mondo:Arduino:OPTA
+Token 2: Arduino:OPTA
 Token 3: OPTA
 ```
 
