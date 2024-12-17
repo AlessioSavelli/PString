@@ -62,15 +62,43 @@ PString& PString::operator=(const String& str) {
     return *this = str.c_str();
 }
 
-// Operatore == per confronto
+// Operatore == con PString
 bool PString::operator==(const PString& other) const {
-    return strcmp(data, other.data) == 0;
+    return strcmp(data, other.c_str()) == 0;
 }
 
-// Operatore != per confronto
 bool PString::operator!=(const PString& other) const {
     return !(*this == other);
 }
+
+// Operatore == con const char*
+bool PString::operator==(const char* str) const {
+    if (!str) return false; // Gestisce puntatore nullo
+    return strcmp(data, str) == 0;
+}
+
+bool PString::operator!=(const char* str) const {
+    return !(*this == str);
+}
+
+// Operatore == con String
+bool PString::operator==(const String& str) const {
+    return *this == str.c_str();
+}
+
+bool PString::operator!=(const String& str) const {
+    return !(*this == str);
+}
+
+// Operatore == con singolo char
+bool PString::operator==(char c) const {
+    return length == 1 && data[0] == c;
+}
+
+bool PString::operator!=(char c) const {
+    return !(*this == c);
+}
+
 
 // Operatore + per concatenazione con char*
 PString PString::operator+(const char* str) const {
@@ -89,6 +117,68 @@ PString PString::operator+(const char* str) const {
 PString PString::operator+(const PString& other) const {
     return *this + other.data;
 }
+
+// Operatore + con char: restituisce una nuova stringa con il carattere aggiunto
+PString PString::operator+(char c) const {
+    size_t newLength = length + 1; // Lunghezza aumentata di 1 per il nuovo carattere
+
+    char* newData = new char[newLength + 1]; // Alloca nuova memoria (+1 per '\0')
+    if (data) {
+        strcpy(newData, data); // Copia i dati esistenti
+    }
+    newData[length] = c;       // Aggiunge il nuovo carattere alla fine
+    newData[newLength] = '\0'; // Aggiunge il terminatore
+
+    PString result(newData);   // Crea un nuovo oggetto PString
+    delete[] newData;          // Libera la memoria temporanea
+
+    return result;
+}
+
+
+// Operatore += con const char*
+PString& PString::operator+=(const char* str) {
+    if (!str) return *this; // Controlla se il puntatore è nullo
+
+    size_t strLen = strlen(str);
+    size_t newLength = length + strLen;
+
+    char* newData = new char[newLength + 1]; // Alloca nuova memoria
+    if (data) {
+        strcpy(newData, data); // Copia i dati esistenti
+    }
+    strcat(newData, str);      // Concatena i nuovi dati
+
+    delete[] data;             // Libera la memoria precedente
+    data = newData;            // Aggiorna il puntatore ai dati
+    length = newLength;        // Aggiorna la lunghezza
+
+    return *this;
+}
+
+// Operatore += con PString
+PString& PString::operator+=(const PString& other) {
+    return *this += other.c_str(); // Riutilizza l'operatore con const char*
+}
+
+// Operatore += con char
+PString& PString::operator+=(char c) {
+    size_t newLength = length + 1;
+
+    char* newData = new char[newLength + 1]; // Alloca nuova memoria
+    if (data) {
+        strcpy(newData, data); // Copia i dati esistenti
+    }
+    newData[length] = c;       // Aggiunge il nuovo carattere
+    newData[newLength] = '\0'; // Termina la stringa
+
+    delete[] data;             // Libera la memoria precedente
+    data = newData;            // Aggiorna il puntatore ai dati
+    length = newLength;        // Aggiorna la lunghezza
+
+    return *this;
+}
+
 
 // Restituisce il puntatore alla stringa
 const char* PString::c_str() const {
@@ -176,13 +266,45 @@ bool PString::endsWith(const PString& suffix) const {
 
 bool PString::endsWith(const char* suffix) const {
     size_t suffixLen = strlen(suffix);
-    if (suffixLen > length) return false;
-    return strcmp(data + length - suffixLen, suffix) == 0;
+    if (suffixLen > length) return false; // Se il suffisso è più lungo della stringa, ritorna false
+
+    // Primo controllo: confronto esatto dei caratteri finali
+    bool res = strncmp(data + length - suffixLen, suffix, suffixLen) == 0;
+
+    if (!res) {
+        // Se il confronto fallisce, crea una copia temporanea con '\0' aggiunto
+        char tempSuffix[suffixLen + 2]; // Alloca spazio per il suffisso + '\0'
+        strcpy(tempSuffix, suffix);
+        tempSuffix[suffixLen] = '\0'; // Aggiunge il terminatore esplicitamente
+
+        res = strncmp(data + length - suffixLen, tempSuffix, suffixLen) == 0;
+    }
+
+    return res;
 }
 
 bool PString::endsWith(const String& suffix) const {
     return endsWith(suffix.c_str());
 }
+
+// Metodo trimEnd
+void PString::trimEnd() {
+    if (length == 0) return; // Se la stringa è vuota, non fare nulla
+
+    size_t newLength = length; // Usa size_t al posto di int
+
+    // Trova l'ultimo carattere non spazio
+    while (newLength > 0 && isspace(data[newLength - 1])) {
+        newLength--;
+    }
+
+    if (newLength < length) { // Confronto tra size_t
+        data[newLength] = '\0'; // Aggiunge il terminatore '\0'
+        length = newLength;     // Aggiorna la lunghezza della stringa
+    }
+}
+
+
 
 // Metodo startsWith
 bool PString::startsWith(const PString& prefix) const {
