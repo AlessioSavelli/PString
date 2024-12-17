@@ -1,0 +1,16 @@
+
+PString    KEYWORD1
+startsWith KEYWORD2
+endsWith   KEYWORD2
+contains   KEYWORD2
+split      KEYWORD2
+splitPtr   KEYWORD2
+findChar   KEYWORD2
+findSubstring KEYWORD2
+lengthStr  KEYWORD2
+print      KEYWORD2
+c_str      KEYWORD2
+operator=  KEYWORD2
+operator== KEYWORD2
+operator!= KEYWORD2
+operator+  KEYWORD2
